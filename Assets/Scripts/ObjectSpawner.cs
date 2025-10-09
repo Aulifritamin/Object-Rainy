@@ -69,9 +69,9 @@ public class ObjectSpawner : MonoBehaviour
         _objectPool.Release(poolObject);
     }
     
-    private void HandleCollidedGround(FallingObject obj)
+    private void HandleCollidedGround(FallingObject poolObject)
     {
-        obj.SetColor(_utilities.GetRandomColor());
-        obj.SetTimeToLive(_utilities.GetRandomTimeToLive());
+        poolObject.SetColor(_utilities.GetRandomColor());
+        poolObject.SetTimeToLive(_utilities.GetRandomTimeToLive());
     }
 }
