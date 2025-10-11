@@ -20,7 +20,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4649333077052742383
 Transform:
   m_ObjectHideFlags: 0
@@ -139,7 +139,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 3
+  m_CollisionDetection: 2
 --- !u!114 &1814074528224306162
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,3 +152,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e0685e597dce9446a4042ea16e21304, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FallingObject
+  _utilities: {fileID: 6636740437529127311, guid: 95295cb85d2903e46a5fd1c8bbc60139, type: 3}

@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Renderer), typeof(Rigidbody))]
 public class FallingObject : MonoBehaviour
 {
+    [SerializeField] private UtilitiesRandom _utilities;
+
     private float _initialTimeToLive = 0f;
     private bool _initialIsContacted = false;
     private Vector3 _initialPosition = Vector3.zero;
@@ -15,19 +17,18 @@ public class FallingObject : MonoBehaviour
     public bool IsContacted { get; private set; } = false;
     public float TimeToLive { get; private set; } = 0f;
 
-    public Renderer ObjectRenderer { get; private set; }
-    public Rigidbody ObjectRigidbody { get; private set; }
+    public Renderer Renderer { get; private set; }
+    public Rigidbody Rigidbody { get; private set; }
 
     public event Action <FallingObject> OnDespawn;
-    public event Action <FallingObject> CollidedGround;
 
     private void Awake()
     {
-        ObjectRenderer = GetComponent<Renderer>();
-        ObjectRigidbody = GetComponent<Rigidbody>();
+        Renderer = GetComponent<Renderer>();
+        Rigidbody = GetComponent<Rigidbody>();
     }
 
-    public void ResetState()
+    public void ResetingState()
     {
         if (_despawnCoroutine != null)
         {
@@ -38,35 +39,36 @@ public class FallingObject : MonoBehaviour
         IsContacted = _initialIsContacted;
         TimeToLive = _initialTimeToLive;
 
-        ObjectRigidbody.linearVelocity = _initialPosition;
-        ObjectRigidbody.angularVelocity = _initialPosition;
-        ObjectRenderer.material.color = _initialColor;
+        Rigidbody.linearVelocity = _initialPosition;
+        Rigidbody.angularVelocity = _initialPosition;
+        Renderer.material.color = _initialColor;
     }
 
-    public void SetColor(Color color)
+    public void SetingColor(Color color)
     {
-        if (ObjectRenderer != null)
+        if (Renderer != null)
         {
-            ObjectRenderer.material.color = color;
+            Renderer.material.color = color;
         }
     }
 
-    public void SetTimeToLive(float time)
+    public void SetingTimeToLive(float time)
     {
         TimeToLive = time;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ground") && IsContacted == false)
+        if (IsContacted == false && collision.gameObject.TryGetComponent<Ground>(out _))
         {
-            CollidedGround?.Invoke(this);
             IsContacted = true;
-            _despawnCoroutine = StartCoroutine(DespawnTimer());
+            SetingTimeToLive(_utilities.GetingRandomTimeToLive());
+            SetingColor(_utilities.GetingRandomColor());
+            _despawnCoroutine = StartCoroutine(DespawningTimer());
         }
     }
 
-    private IEnumerator DespawnTimer()
+    private IEnumerator DespawningTimer()
     {
         yield return new WaitForSeconds(TimeToLive);
         OnDespawn?.Invoke(this);

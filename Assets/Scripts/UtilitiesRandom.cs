@@ -9,17 +9,17 @@ public class UtilitiesRandom : MonoBehaviour
     private float _minValue = 2f;
     private float _maxValue = 5f;
 
-    public Color GetRandomColor()
+    public Color GetingRandomColor()
     {
-        return new Color(Random.value, Random.value, Random.value);
+        return Random.ColorHSV();
     }
 
-    public float GetRandomTimeToLive()
+    public float GetingRandomTimeToLive()
     {
         return Random.Range(_minValue, _maxValue);
     }
 
-    public Vector3 GetRandomPositionOnTerrain()
+    public Vector3 GetingRandomPositionOnTerrain()
     {
         var terrain = _terrain != null ? _terrain : Terrain.activeTerrain;
         var data = terrain.terrainData;

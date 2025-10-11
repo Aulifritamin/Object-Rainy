@@ -19,59 +19,47 @@ public class ObjectSpawner : MonoBehaviour
         _objectPool = new ObjectPool<FallingObject>
             (
             createFunc: () => Instantiate(_objectPrefab),
-            actionOnGet: OnGetFromPool,
-            actionOnRelease: OnReleaseCleanUp,
+            actionOnGet: GetingFromPool,
+            actionOnRelease: ReleasingCleanUp,
             actionOnDestroy: (spawnObject) => Destroy(spawnObject.gameObject),
             collectionCheck: true,
             defaultCapacity: _capacityPool,
             maxSize: _maxSizePool
             );
-
-        for (int i = 0; i < _capacityPool; i++)
-        {
-            var obj = _objectPool.Get();
-            _objectPool.Release(obj);
-        }
     }
 
     private void Start()
     {
-        StartCoroutine(StartSpawning());
+        StartCoroutine(StartingSpawning());
     }
 
-    private IEnumerator StartSpawning()
+    private IEnumerator StartingSpawning()
     {
-        while (true)
+        WaitForSeconds timer = new WaitForSeconds(_spawnInterval);
+
+        while (enabled)
         {
-            yield return new WaitForSeconds(_spawnInterval);
+            yield return timer;
             _objectPool.Get();
         }
     }
 
-    private void OnGetFromPool(FallingObject poolObject)
+    private void GetingFromPool(FallingObject poolObject)
     {
-        poolObject.OnDespawn += ReturnToPool;
-        poolObject.CollidedGround += HandleCollidedGround;
-        poolObject.transform.position = _utilities.GetRandomPositionOnTerrain();
+        poolObject.OnDespawn += ReturningToPool;
+        poolObject.transform.position = _utilities.GetingRandomPositionOnTerrain();
         poolObject.gameObject.SetActive(true);
     }
 
-    private void OnReleaseCleanUp(FallingObject poolObject)
+    private void ReleasingCleanUp(FallingObject poolObject)
     {
         poolObject.gameObject.SetActive(false);
-        poolObject.OnDespawn -= ReturnToPool;
-        poolObject.CollidedGround -= HandleCollidedGround;
-        poolObject.ResetState();
+        poolObject.OnDespawn -= ReturningToPool;
+        poolObject.ResetingState();
     }
 
-    private void ReturnToPool(FallingObject poolObject)
+    private void ReturningToPool(FallingObject poolObject)
     {
         _objectPool.Release(poolObject);
-    }
-    
-    private void HandleCollidedGround(FallingObject poolObject)
-    {
-        poolObject.SetColor(_utilities.GetRandomColor());
-        poolObject.SetTimeToLive(_utilities.GetRandomTimeToLive());
     }
 }
