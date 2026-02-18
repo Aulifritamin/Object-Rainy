@@ -3,20 +3,29 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class ObjectSpawner : MonoBehaviour
+public abstract class ObjectSpawner<T> : MonoBehaviour where T : Component
 {
-    [SerializeField] private UtilitiesRandom _utilities;
-    [SerializeField] private FallingObject _objectPrefab;
+    [SerializeField] private T _objectPrefab;
 
-    [SerializeField] private float _spawnInterval = 0.5f;
     [SerializeField] private int _capacityPool = 10;
     [SerializeField] private int _maxSizePool = 20;
 
-    private ObjectPool<FallingObject> _objectPool;
+    private int _totalSpawnedObjects = 0;
 
-    private void Awake()
+    protected float _spawnInterval;
+    protected string _textUI;
+    protected ObjectPool<T> _objectPool;
+
+    public int ActiveCount => _objectPool != null ? _objectPool.CountActive : 0;
+    public int CreatedCount => _objectPool != null ? _objectPool.CountAll : 0;
+    public int TotalSpawnedCount => _totalSpawnedObjects;
+    public string TextUI => _textUI;
+
+    public event Action OnPoolDataChanged;
+
+    protected virtual void Awake()
     {
-        _objectPool = new ObjectPool<FallingObject>
+        _objectPool = new ObjectPool<T>
             (
             createFunc: () => Instantiate(_objectPrefab),
             actionOnGet: GetingFromPool,
@@ -26,14 +35,11 @@ public class ObjectSpawner : MonoBehaviour
             defaultCapacity: _capacityPool,
             maxSize: _maxSizePool
             );
+
+        OnPoolDataChanged?.Invoke();
     }
 
-    private void Start()
-    {
-        StartCoroutine(StartingSpawning());
-    }
-
-    private IEnumerator StartingSpawning()
+    protected virtual IEnumerator StartingSpawning()
     {
         WaitForSeconds timer = new WaitForSeconds(_spawnInterval);
 
@@ -44,21 +50,20 @@ public class ObjectSpawner : MonoBehaviour
         }
     }
 
-    private void GetingFromPool(FallingObject poolObject)
+    protected virtual void GetingFromPool(T poolObject)
     {
-        poolObject.OnDespawn += ReturningToPool;
-        poolObject.transform.position = _utilities.GetingRandomPositionOnTerrain();
         poolObject.gameObject.SetActive(true);
+        _totalSpawnedObjects++;
+        OnPoolDataChanged?.Invoke();
     }
 
-    private void ReleasingCleanUp(FallingObject poolObject)
+    protected virtual void ReleasingCleanUp(T poolObject)
     {
         poolObject.gameObject.SetActive(false);
-        poolObject.OnDespawn -= ReturningToPool;
-        poolObject.ResetingState();
+        OnPoolDataChanged?.Invoke();
     }
 
-    private void ReturningToPool(FallingObject poolObject)
+    protected virtual void ReturningToPool(T poolObject)
     {
         _objectPool.Release(poolObject);
     }
